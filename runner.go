@@ -300,9 +300,10 @@ func (r *runner) createContext() (*TemplateContext, error) {
 	}
 
 	self := Self{
-		Stack:    metaSelf.StackName,
-		Service:  metaSelf.ServiceName,
-		HostUUID: metaSelf.HostUUID,
+		Stack:         metaSelf.StackName,
+		Service:       metaSelf.ServiceName,
+		HostUUID:      metaSelf.HostUUID,
+		ContainerName: metaSelf.Name,
 	}
 
 	ctx := TemplateContext{

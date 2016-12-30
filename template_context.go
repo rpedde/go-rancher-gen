@@ -21,6 +21,25 @@ type TemplateContext struct {
 	Self       Self
 }
 
+// GetContainer returns the container matching the given name.
+func (c *TemplateContext) GetContainer(v ...string) (Container, error) {
+	container_name := ""
+	if len(v) > 0 {
+		container_name = v[0]
+	}
+	if container_name == "" {
+		container_name = c.Self.ContainerName
+	}
+
+	for _, container := range c.Containers {
+		if strings.EqualFold(container_name, container.Name) {
+			return container, nil
+		}
+	}
+
+	return Container{}, NotFoundError{"(container) could not find host by name: " + container_name}
+}
+
 // GetHost returns the Host with the given UUID. If the argument is omitted
 // the local host is returned.
 func (c *TemplateContext) GetHost(v ...string) (Host, error) {
@@ -74,6 +93,28 @@ func (c *TemplateContext) GetService(v ...string) (Service, error) {
 	}
 
 	return Service{}, NotFoundError{"(service) could not find service by identifier: " + identifier}
+}
+
+func (c *TemplateContext) GetContainers(selectors ...string) ([]Container, error) {
+	if len(selectors) == 0 {
+		return c.Containers, nil
+	}
+
+	labels := LabelMap{}
+
+	for _, f := range selectors {
+		if !strings.HasPrefix(f, "@") {
+			return nil, fmt.Errorf("(containers) invalid argument '%s'", f)
+		}
+		f = f[1:len(f)]
+		parts := strings.Split(f, "=")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("(containers) malformed label selector '%s'", f)
+		}
+		labels[parts[0]] = parts[1]
+	}
+
+	return filterContainersByLabel(c.Containers, labels), nil
 }
 
 func (c *TemplateContext) GetHosts(selectors ...string) ([]Host, error) {
@@ -155,6 +196,16 @@ func inLabelMap(stack, needle LabelMap) bool {
 		break
 	}
 	return match
+}
+
+func filterContainersByLabel(containers []Container, labels LabelMap) []Container {
+	result := make([]Container, 0)
+	for _, c := range containers {
+		if ok := inLabelMap(c.Labels, labels); ok {
+			result = append(result, c)
+		}
+	}
+	return result
 }
 
 func filterHostsByLabel(hosts []Host, labels LabelMap) []Host {

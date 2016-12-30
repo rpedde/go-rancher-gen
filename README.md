@@ -148,16 +148,16 @@ type Host struct {
 
 The `LabelMap` and `MetadataMap` types implement methods for easily checking the existence of specific keys and accessing their values:
 
-**`Labels.Exists(key string) bool`**    
+**`Labels.Exists(key string) bool`**
 Returns true if the given label key exists in the map.
 
-**`Labels.GetValue(key, default string) string`**    
+**`Labels.GetValue(key, default string) string`**
 Returns the value of the given label key. The function accepts an optional default value that is returned when the key doesn't exist or is set to an empty string.
 
-**`Metadata.Exists(key string) bool`**   
+**`Metadata.Exists(key string) bool`**
 Returns true if the given metadata key exists in the map.
 
-**`Metadata.GetValue(key, default interface{}) interface{}`**    
+**`Metadata.GetValue(key, default interface{}) interface{}`**
 Returns the value of the given label key. The function accepts an optional default value that is returned when the key doesn't exist.
 
 **Examples**:
@@ -193,9 +193,9 @@ Label foo: {{.Labels.GetValue "foo" "default value"}}
 
 Lookup a specific host
 
-**Optional argument**   
-UUID *string*    
-**Return Type**   
+**Optional argument**
+UUID *string*
+**Return Type**
 `Host`
 
 If the argument is omitted the local host is returned:
@@ -208,9 +208,9 @@ If the argument is omitted the local host is returned:
 
 Lookup hosts
 
-**Optional parameters**   
-labelSelector *string*    
-**Returned Type**   
+**Optional parameters**
+labelSelector *string*
+**Returned Type**
 `[]Host`
 
 The function returns a slice of `Host` which can be used for ranging in a template:
@@ -252,9 +252,9 @@ If the argument is omitted all hosts are returned:
 
 Lookup a specific service
 
-**Optional parameter**   
-serviceIdentifier *string*       
-**Returned Type**   
+**Optional parameter**
+serviceIdentifier *string*
+**Returned Type**
 `Service`
 
 The function returns a `Service` struct. You can use the `Containers` field for ranging over all containers belonging to the service:
@@ -296,10 +296,10 @@ If no argument is given the local service is returned:
 
 Lookup services matching the given stack and label selectors
 
-**Optional parameters**   
-stackSelector *string*   
-labelSelector *string*     
-**Return Type**   
+**Optional parameters**
+stackSelector *string*
+labelSelector *string*
+**Return Type**
 `[]Service`
 
 Just like with the `hosts` function multiple label selectors can be passed to select services with matching labels:
@@ -326,27 +326,87 @@ If arguments are omitted then all services are returned:
 {{services}}
 ```
 
+### `container`
+
+Lookup a specific container
+
+**Optional argument**
+name *string*
+**Return Type**
+`Container`
+
+If the argument is omitted the local container is returned:
+
+```liquid
+{{container}}
+```
+
+### `containers`
+
+Lookup containers
+
+**Optional parameters**
+labelSelector *string*
+**Returned Type**
+`[]Container`
+
+The function returns a slice of `Container` which can be used for ranging in a template:
+
+```liquid
+{{range containers}}
+{{.Name}} {{.Address}} {{.State}}
+{{end}}
+```
+
+which would produce something like:
+
+```text
+test-test-1 10.42.18.23 running
+test-test-2 10.42.18.24 running
+```
+
+Like hosts, one or multiple label selectors can be passed as arguments to limit the result to ctonainers with matching labels. The syntax of the label selector is `@label-key=label-value`.
+
+The following function returns only containers that have a label "foo" with the value "bar":
+
+```liquid
+{{containers "@foo=bar"}}
+```
+
+The label selector syntax supports a regex pattern on it's right side. E.g. to lookup containers that have a specific label regardless of the value:
+
+```liquid
+{{containers "@foo=.*"}}
+```
+
+If the argument is omitted all containers are returned:
+
+```liquid
+{{containers}}
+```
+
+
 ### Helper Functions and Pipes
 
 ### `whereLabelExists`
 
 Filter a slice of hosts, services or containers returning the items that have the given label key.
 
-**Parameters**     
-labelKey *string*    
-input *[]Host, []Service or []Container*   
-**Return Type**   
+**Parameters**
+labelKey *string*
+input *[]Host, []Service or []Container*
+**Return Type**
 same as input
 
 ### `whereLabelEquals`
 
 Filter a slice of hosts, services or containers returning the items that have the given label key and value.
 
-**Arguments**   
-labelKey *string*    
-labelValue *string*    
-input *[]Host, []Service or []Container*   
-**Return Type**   
+**Arguments**
+labelKey *string*
+labelValue *string*
+input *[]Host, []Service or []Container*
+**Return Type**
 same as input
 
 ```liquid
@@ -360,21 +420,21 @@ same as input
 
 Filter a slice of hosts, services or containers returning the items that have the given label and a value matching the regex pattern.
 
-**Arguments**   
-labelKey *string*    
-regexPattern *string*     
-input *[]Host, []Service or []Container*    
-**Return Type**   
+**Arguments**
+labelKey *string*
+regexPattern *string*
+input *[]Host, []Service or []Container*
+**Return Type**
 same as input
 
 ### `groupByLabel`
 
 This function takes a slice of hosts, services or containers and groups the items by their value of the given label. It returns a map with label values as key and a slice of corresponding elements items as value.
 
-**Arguments**   
-label-key *string*  
-input *[]Host,[]Service,[]Container*       
-**Return Type**   
+**Arguments**
+label-key *string*
+input *[]Host,[]Service,[]Container*
+**Return Type**
 map[string][]Host/[]Service/[]Container
 
 ```liquid
@@ -438,7 +498,7 @@ See Go's [strings.Split()](http://golang.org/pkg/strings/#Split) for more inform
 
 ### `join`
 
-Alias for strings.Join    
+Alias for strings.Join
 Takes the given slice of strings as a pipe and joins them on the provided string:
 
 ```liquid
@@ -449,7 +509,7 @@ See Go's [strings.Join()](http://golang.org/pkg/strings/#Join) for more informat
 
 ### `toLower`
 
-Alias for strings.ToLower    
+Alias for strings.ToLower
 Takes the argument as a string and converts it to lowercase.
 
 ```liquid
@@ -460,7 +520,7 @@ See Go's [strings.ToLower()](http://golang.org/pkg/strings/#ToLower) for more in
 
 ### `toUpper`
 
-Alias for strings.ToUpper    
+Alias for strings.ToUpper
 Takes the argument as a string and converts it to uppercase.
 
 ```liquid
@@ -471,7 +531,7 @@ See Go's [strings.ToUpper()](http://golang.org/pkg/strings/#ToUpper) for more in
 
 ### `contains`
 
-Alias for strings.Contains 
+Alias for strings.Contains
 
 See Go's [strings.Contains()](http://golang.org/pkg/strings/#Contains) for more information.
 

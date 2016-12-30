@@ -31,10 +31,32 @@ func newFuncMap(ctx *TemplateContext) template.FuncMap {
 		"hosts":             hostsFunc(ctx),
 		"service":           serviceFunc(ctx),
 		"services":          servicesFunc(ctx),
+		"container":         containerFunc(ctx),
+		"containers":        containersFunc(ctx),
 		"whereLabelExists":  whereLabelExists,
 		"whereLabelEquals":  whereLabelEquals,
 		"whereLabelMatches": whereLabelEquals,
 		"groupByLabel":      groupByLabel,
+	}
+}
+
+// containerFunc returns a single container given a string name
+func containerFunc(ctx *TemplateContext) func(...string) (interface{}, error) {
+	return func(s ...string) (result interface{}, err error) {
+		result, err = ctx.GetContainer(s...)
+		if _, ok := err.(NotFoundError); ok {
+			log.Debug(err)
+			return nil, nil
+		}
+		return
+	}
+}
+
+// containersFunc returns all available containers, optionally filtered by
+// label values
+func containersFunc(ctx *TemplateContext) func(...string) (interface{}, error) {
+	return func(s ...string) (interface{}, error) {
+		return ctx.GetContainers(s...)
 	}
 }
 

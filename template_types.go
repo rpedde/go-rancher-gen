@@ -36,9 +36,10 @@ type Host struct {
 
 // Self contains information about the container running this application.
 type Self struct {
-	Stack    string
-	Service  string
-	HostUUID string
+	Stack         string
+	Service       string
+	HostUUID      string
+	ContainerName string
 }
 
 // ServicePort represents a port exposed by a service
