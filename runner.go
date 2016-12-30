@@ -61,7 +61,7 @@ func (r *runner) Run() error {
 		return r.poll()
 	}
 
-	log.Info("Polling Metadata with %d second interval", r.Config.Interval)
+	log.Infof("Polling Metadata with %d second interval", r.Config.Interval)
 	ticker := time.NewTicker(time.Duration(r.Config.Interval) * time.Second)
 	defer ticker.Stop()
 	for {
@@ -176,7 +176,7 @@ func (r *runner) processTemplate(funcs template.FuncMap, t Template) error {
 		return fmt.Errorf("Could not write destination file %s: %v", t.Dest, err)
 	}
 
-	log.Info("Destination file %s has been updated", t.Dest)
+	log.Infof("Destination file %s has been updated", t.Dest)
 
 	if t.NotifyCmd != "" {
 		if err := notify(t.NotifyCmd, t.NotifyOutput); err != nil {
@@ -329,8 +329,9 @@ func parseServicePorts(ports []string) []ServicePort {
 				})
 				continue
 			}
+		} else {
+			log.Warnf("Unexpected format of service port: %s", port)
 		}
-		log.Warnf("Unexpected format of service port: %s", port)
 	}
 
 	return ret
